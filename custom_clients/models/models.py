@@ -24,9 +24,9 @@ class PropertyClientManagement(models.Model):
         if employee and employee.user_id:
             return employee.user_id.partner_id.id
 
-    name = fields.Many2one(comodel_name='res.partner', string='Full Name', required=True, domain="[('customer', '=', "
-                                                                                                  "True)]")
-    tin_no = fields.Char(related='name.vat', string='TIN No', required=False)
+    name = fields.Many2one(comodel_name='res.partner', string='Full Name', required=True,
+                           domain="[('customer', '=', True)]")
+    tin_no = fields.Char(related='name.vat', string='TIN No', required=False, store=True)
     image_small = fields.Binary(
         "Client Image", attachment=True)
     creator_id = fields.Many2one('res.partner', string="Creator", readonly=True, store=True, default=_default_creator)
@@ -161,21 +161,21 @@ class PropertyClientManagement(models.Model):
             record.total_paid = amountPaid
             record.total_balance = record.total_rent - amountPaid
 
-    @api.model
-    def create(self, vals):
-        res = super(PropertyClientManagement, self).create(vals)
-        clientDets = self.env['property.client.management'].search([('id', '=', res.id)], limit=1)
-        if clientDets:
-            partner = self.env['res.partner'].sudo().search([('name', '=', clientDets.name)], limit=1)
-            if not partner:
-                partner = self.env['res.partner'].sudo().create({
-                    'name': clientDets.name,
-                    'customer': True
-                })
-            else:
-                partner.sudo().write({'customer': True})
-            clientDets.sudo().write({'partner_id': partner.id})
-        return res
+    # @api.model
+    # def create(self, vals):
+    #     res = super(PropertyClientManagement, self).create(vals)
+    #     clientDets = self.env['property.client.management'].search([('id', '=', res.id)], limit=1)
+    #     if clientDets:
+    #         partner = self.env['res.partner'].sudo().search([('name', '=', clientDets.name)], limit=1)
+    #         if not partner:
+    #             partner = self.env['res.partner'].sudo().create({
+    #                 'name': clientDets.name,
+    #                 'customer': True
+    #             })
+    #         else:
+    #             partner.sudo().write({'customer': True})
+    #         clientDets.sudo().write({'partner_id': partner.id})
+    #     return res
 
     @api.multi
     def compute_rent_installment(self):
