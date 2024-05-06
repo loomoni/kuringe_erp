@@ -24,8 +24,9 @@ class PropertyClientManagement(models.Model):
         if employee and employee.user_id:
             return employee.user_id.partner_id.id
 
-    name = fields.Char('Full Name', required=True)
-    tin_no = fields.Char('TIN No', required=True)
+    name = fields.Many2one(comodel_name='res.partner', string='Full Name', required=True, domain="[('customer', '=', "
+                                                                                                  "True)]")
+    tin_no = fields.Char(related='name.vat', string='TIN No', required=False)
     image_small = fields.Binary(
         "Client Image", attachment=True)
     creator_id = fields.Many2one('res.partner', string="Creator", readonly=True, store=True, default=_default_creator)
