@@ -4,6 +4,7 @@ from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError, UserError
 from datetime import datetime
 
+
 class CashRequest(models.Model):
     _name = "account.cash.request"
     _description = "Cash Requests"
@@ -11,6 +12,7 @@ class CashRequest(models.Model):
 
     STATE_SELECTION = [
         ("draft", "Draft"),
+        ("request", "Requested"),
         ("checked_ss", "Checked by SS"),
         ("checked_acc", "Checked by Accountant"),
         ("endorsed", "Endorsed"),
@@ -33,7 +35,6 @@ class CashRequest(models.Model):
         if employee:
             return employee.id
 
-
     def _default_reference(self):
         itemList = self.env['account.cash.request'].sudo().search_count([])
         return 'CASH/REQUEST/00' + str(itemList + 1)
@@ -42,25 +43,32 @@ class CashRequest(models.Model):
     date = fields.Date(string="Date", required=True, default=fields.Date.today())
     requester_id = fields.Many2one('hr.employee', string="Requested By", required=True, default=_default_requester,
                                    readonly=True, store=True, states={'draft': [('readonly', False)]})
-    department_id = fields.Many2one('hr.department', string='Department', required=True, default=_default_department, readonly=True, store=True, states={'draft': [('readonly', False)]})
-    currency_id = fields.Many2one('res.currency', required=True, default=lambda self: self.env.user.company_id.currency_id)
+    department_id = fields.Many2one('hr.department', string='Department', required=True, default=_default_department,
+                                    readonly=True, store=True, states={'draft': [('readonly', False)]})
+    currency_id = fields.Many2one('res.currency', required=True,
+                                  default=lambda self: self.env.user.company_id.currency_id)
     total_amount = fields.Monetary(string='Total Amount', readonly=True, store=True, compute='_compute_amounts')
     total_used = fields.Monetary(string='Used Amount', store=True, readonly=True, compute='_compute_amounts')
     total_balance = fields.Monetary(string='Total Balance', store=True, readonly=True, compute='_compute_amounts')
-    analytic_account_id = fields.Many2one('account.analytic.account', 'Budget Line', domain="[('department_id','=',department_id)]")
+    analytic_account_id = fields.Many2one('account.analytic.account', 'Budget Line',
+                                          domain="[('department_id','=',department_id)]")
     is_budgeted = fields.Boolean('Budgeted Cash Request', default=False)
     is_hq_request = fields.Boolean('HQ Cash Request', default=False)
-    from_journal_id = fields.Many2one('account.journal', string='Credit Journal', domain="[('type','in',['cash','bank'])]")
+    from_journal_id = fields.Many2one('account.journal', string='Credit Journal',
+                                      domain="[('type','in',['cash','bank'])]")
     to_journal_id = fields.Many2one('account.journal', string='Debit Journal')
-    from_credit_account_id = fields.Many2one('account.account', string='Credit Account', required=False, store=True, states={'endorsed': [('required', True)]})
-    to_debit_account_id = fields.Many2one('account.account', string='Debit Account', required=False, store=True, states={'endorsed': [('required', True)]})
+    from_credit_account_id = fields.Many2one('account.account', string='Credit Account', required=False, store=True,
+                                             states={'endorsed': [('required', True)]})
+    to_debit_account_id = fields.Many2one('account.account', string='Debit Account', required=False, store=True,
+                                          states={'endorsed': [('required', True)]})
     payment_line_id = fields.Many2one('account.payment', string='Disbursement Entry', readonly=True, store=True)
     state = fields.Selection(STATE_SELECTION, index=True, track_visibility='onchange',
                              readonly=True, required=True, copy=False, default='draft', store=True)
     line_ids = fields.One2many('account.cash.request.lines', 'cash_request_id', string="Expenditure Lines", index=True,
                                track_visibility='onchange')
-    retire_ids = fields.One2many('account.cash.request.retirement.lines', 'cash_request_id', string="Retirement Lines", index=True,
-                               track_visibility='onchange')
+    retire_ids = fields.One2many('account.cash.request.retirement.lines', 'cash_request_id', string="Retirement Lines",
+                                 index=True,
+                                 track_visibility='onchange')
 
     _sql_constraints = [
         ('name_unique',
@@ -77,7 +85,6 @@ class CashRequest(models.Model):
                 self.is_hq_request = True
             else:
                 self.is_hq_request = False
-
 
     # set default account
     @api.multi
@@ -100,14 +107,38 @@ class CashRequest(models.Model):
                     rec.to_debit_account_id = rec.to_journal_id.default_debit_account_id.id
 
     @api.multi
+    def button_send_request(self):
+        self.write({'state': 'request'})
+        mail_template = self.env.ref('cash_requests.notify_supervisor')
+        mail_template.send_mail(self.id, force_send=True)
+        return True
+
+    @api.multi
     def button_check_ss(self):
         self.write({'state': 'checked_ss'})
+        mail_template = self.env.ref('cash_requests.notify_accountant')
+        mail_template.send_mail(self.id, force_send=True)
         return True
 
     @api.multi
     def button_check_acc(self):
         if self.is_hq_request:
             self.write({'state': 'endorsed'})
+            fm = self.env['hr.employee'].sudo().search([('is_fm', '=', True)], limit=1)
+            if fm:
+                base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+                base_url += '/web#id=%d&view_type=form&model=%s' % (self.id, self._name)
+                mail_content = "Dear Finance Manager," + "<br>Cash request is waiting your response.Please click the link below<br/> " + str(
+                    base_url)
+                values = {'model': 'annual.budget',
+                          'res_id': self.id,
+                          'subject': "Annual Budget Notification",
+                          'body_html': mail_content,
+                          'parent_id': None,
+                          'email_from': fm.user_id.partner_id.company_id.email,
+                          'email_to': fm.user_id.partner_id.email
+                          }
+                self.env['mail.mail'].sudo().create(values)
         else:
             self.write({'state': 'checked_acc'})
         return True
@@ -140,6 +171,8 @@ class CashRequest(models.Model):
                     'name': self.name,
                 })
                 payment_id.post()
+                mail_template = self.env.ref('cash_requests.notify_requester_cash_approved')
+                mail_template.send_mail(self.id, force_send=True)
                 self.write({'state': 'approved', 'payment_line_id': payment_id.id})
         else:
             self.write({'state': 'recommended'})
@@ -195,12 +228,11 @@ class CashRequest(models.Model):
             for line in rec.line_ids:
                 totalAmount += line.total_cost
             for line in rec.retire_ids:
-               if line.state == 'retired':
+                if line.state == 'retired':
                     usedAmount += line.total_amount
             rec.total_amount = totalAmount
             rec.total_used = usedAmount
             rec.total_balance = totalAmount - usedAmount
-
 
 
 class CashRequestLines(models.Model):
@@ -231,14 +263,13 @@ class CashRequestLines(models.Model):
         if employee and employee.department_id:
             return employee.department_id.id
 
-
     name = fields.Char('Serial No', required=True)
     cash_request_id = fields.Many2one('account.cash.request', string="Cash Request")
     description = fields.Text('Description', required=True)
-    unit_cost = fields.Float(string='Unit Cost', digits=(16,2), required=True, store=True)
-    total_cost = fields.Float(string='Total Cost', digits=(16,2), required=True, store=True)
-    state = fields.Selection(STATE_SELECTION, index=True, track_visibility='onchange', related='cash_request_id.state', store=True)
-
+    unit_cost = fields.Float(string='Unit Cost', digits=(16, 2), required=True, store=True)
+    total_cost = fields.Float(string='Total Cost', digits=(16, 2), required=True, store=True)
+    state = fields.Selection(STATE_SELECTION, index=True, track_visibility='onchange', related='cash_request_id.state',
+                             store=True)
 
 
 class AccountPaymentManualInherit(models.Model):
@@ -247,7 +278,6 @@ class AccountPaymentManualInherit(models.Model):
     staff_payment = fields.Boolean('Staff Payment', default=False)
     staff_payment_to_account_id = fields.Many2one('account.account', string='Payment Debit Account', store=True)
 
-
     @api.one
     @api.depends('invoice_ids', 'payment_type', 'partner_type', 'partner_id')
     def _compute_destination_account_id(self):
@@ -255,7 +285,8 @@ class AccountPaymentManualInherit(models.Model):
             self.destination_account_id = self.invoice_ids[0].account_id.id
         elif self.payment_type == 'transfer':
             if not self.company_id.transfer_account_id.id:
-                raise UserError(_('There is no Transfer Account defined in the accounting settings. Please define one to be able to confirm this transfer.'))
+                raise UserError(
+                    _('There is no Transfer Account defined in the accounting settings. Please define one to be able to confirm this transfer.'))
             self.destination_account_id = self.company_id.transfer_account_id.id
         elif self.partner_id:
             if self.partner_type == 'customer':
@@ -270,6 +301,7 @@ class AccountPaymentManualInherit(models.Model):
         elif self.partner_type == 'supplier':
             default_account = self.env['ir.property'].get('property_account_payable_id', 'res.partner')
             self.destination_account_id = default_account.id
+
 
 class CashRequestRetirement(models.Model):
     _name = "account.cash.request.retirement"
@@ -301,7 +333,8 @@ class CashRequestRetirement(models.Model):
 
     name = fields.Char('Serial No', required=True, default=_default_reference)
     date = fields.Date(string="Date", required=True, default=fields.Date.today())
-    cash_request_id = fields.Many2one('account.cash.request', string="Cash Request", domain=[('state','=','funds_received')])
+    cash_request_id = fields.Many2one('account.cash.request', string="Cash Request",
+                                      domain=[('state', '=', 'funds_received')])
     currency_id = fields.Many2one('res.currency', related='cash_request_id.currency_id')
     requester_id = fields.Many2one('hr.employee', string="Retired By", required=True, default=_default_requester,
                                    readonly=True, store=True, states={'draft': [('readonly', False)]})
@@ -310,7 +343,8 @@ class CashRequestRetirement(models.Model):
     total_amount = fields.Monetary(string='Total Amount', store=True, related='cash_request_id.total_amount')
     state = fields.Selection(STATE_SELECTION, index=True, track_visibility='onchange', readonly=True, required=True,
                              copy=False, default='draft', store=True)
-    line_ids = fields.One2many('account.cash.request.retirement.lines', 'retire_id', string="Retirement Lines", index=True,
+    line_ids = fields.One2many('account.cash.request.retirement.lines', 'retire_id', string="Retirement Lines",
+                               index=True,
                                track_visibility='onchange')
 
     @api.multi
@@ -371,7 +405,7 @@ class CashRequestRetirement(models.Model):
                                 'partner_id': self.requester_id.user_id.partner_id.id
                             }
                             move_vals = {
-                                'ref': 'CASH/RETIRE/LINE'+str(line.id),
+                                'ref': 'CASH/RETIRE/LINE' + str(line.id),
                                 'date': self.date or False,
                                 'journal_id': self.cash_request_id.to_journal_id.id,
                                 'line_ids': [(0, 0, move_line_1), (0, 0, move_line_2)],
@@ -443,7 +477,7 @@ class CashRequestRetirement(models.Model):
                     move = self.env['account.move'].sudo().create(move_vals)
                     move.post()
         self.write({'state': 'retired'})
-        self.cash_request_id.write({'state':'closed'})
+        self.cash_request_id.write({'state': 'closed'})
         return True
 
 
@@ -451,7 +485,6 @@ class CashRequestRetirementLines(models.Model):
     _name = "account.cash.request.retirement.lines"
     _description = "Cash Request Retirement Lines"
     _inherit = ['mail.thread', 'mail.activity.mixin']
-
 
     STATE_SELECTION = [
         ("draft", "Draft"),
@@ -465,17 +498,18 @@ class CashRequestRetirementLines(models.Model):
         ("refund", "Refund")
     ]
 
-
     name = fields.Char('Serial No', required=True)
     retire_type = fields.Selection(RETIRE_TYPE, required=True, default='expense', store=True)
     date = fields.Date(string="Date", required=True, default=fields.Date.today())
     retire_id = fields.Many2one('account.cash.request.retirement', string="Cash Request Retirement")
-    cash_request_id = fields.Many2one('account.cash.request', string="Cash Request", related='retire_id.cash_request_id', store=True)
+    cash_request_id = fields.Many2one('account.cash.request', string="Cash Request",
+                                      related='retire_id.cash_request_id', store=True)
     requester_id = fields.Many2one('hr.employee', string="Retired By", related='retire_id.requester_id', store=True)
     description = fields.Text('Description', required=True)
-    total_amount = fields.Float(string='Total Amount', digits=(16,2), required=True, store=True)
+    total_amount = fields.Float(string='Total Amount', digits=(16, 2), required=True, store=True)
     upload_receipt = fields.Binary("Receipt", attachment=True)
-    state = fields.Selection(STATE_SELECTION, index=True, track_visibility='onchange', default='draft', related='retire_id.state', store=True)
+    state = fields.Selection(STATE_SELECTION, index=True, track_visibility='onchange', default='draft',
+                             related='retire_id.state', store=True)
     expense_journal_id = fields.Many2one('account.journal', string='Expense/Refund Journal', store=True)
     expense_account_id = fields.Many2one('account.account', string='Expense/Refund Account', store=True)
 
@@ -490,4 +524,3 @@ class CashRequestRetirementLines(models.Model):
                     raise ValidationError(_('Please Set To Default Debit Account For This Journal!!!'))
                 else:
                     rec.expense_account_id = rec.expense_journal_id.default_debit_account_id.id
-
