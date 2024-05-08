@@ -27,6 +27,7 @@
         'views/property.xml',
         'views/views.xml',
         'views/templates.xml',
+        'data/email_template.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

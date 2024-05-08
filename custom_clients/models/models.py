@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import math
 from odoo.exceptions import ValidationError, UserError
@@ -53,6 +53,35 @@ class PropertyClientManagement(models.Model):
                                   track_visibility='onchange')
     contract_file_name = fields.Char('Contract File Name')
     signed_contract = fields.Binary(string="Signed Contract")
+
+    @api.model
+    def send_contract_expiry_notification(self):
+        contracts = self.search([('contract_end_date', '=', fields.Date.today() + timedelta(days=30))])
+        for contract in contracts:
+            template = self.env.ref('custom_clients.email_template_contract_expiry_notification')
+            template.send_mail(contract.id, force_send=True)
+
+    def schedule_contract_expiry_notification(self):
+        # Create or update the scheduled action
+        action = self.env.ref('custom_clients.action_send_contract_expiry_notification')
+        if action:
+            action.write({
+                'state': 'code',
+                'code': 'model.send_contract_expiry_notification()'
+            })
+        else:
+            action = self.env['ir.actions.server'].create({
+                'name': 'Send Contract Expiry Notification',
+                'model_id': self.env.ref('custom_clients.model_contract').id,
+                'state': 'code',
+                'code': 'model.send_contract_expiry_notification()',
+                'interval_number': 30,  # Run every 30 days before
+                'interval_type': 'days',
+                'user_id': self.env.user.id,
+            })
+
+        # Set the action to active
+        action.write({'active': True})
 
     @api.multi
     def button_invoice(self):

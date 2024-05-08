@@ -365,6 +365,19 @@
             </field>
         </record>
 
+        <!--        Send email action -->
+        <record id="action_send_contract_expiry_notification" model="ir.actions.server">
+            <field name="name">Send Contract Expiry Notification</field>
+            <field name="model_id" ref="model_property_client_management"/>
+            <field name="state">code</field>
+            <field name="code">model.send_contract_expiry_notification()</field>
+            <field name="interval_number">30</field>
+            <field name="interval_type">days</field>
+            <field name="user_id" eval="False"/>
+            <field name="active" eval="False"/>
+        </record>
+
+
         <!--     Region part end -->
         <menuitem
                 parent="custom_clients.menu_root"
