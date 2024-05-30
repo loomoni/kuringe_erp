@@ -28,6 +28,8 @@
         'views/views.xml',
         'views/templates.xml',
         'data/email_template.xml',
+        'data/report_template.xml',
+        'data/report.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
