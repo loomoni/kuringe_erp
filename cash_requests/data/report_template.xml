@@ -158,7 +158,6 @@
                         <tr>
 
                             <td style="font-weight: bold; height: 30px;">Approved By:
-                                <span t-field="o.requester_id.parent_id.job_id.name"/>
                                 <span>.........................................</span>
                             </td>
                             <td></td>
