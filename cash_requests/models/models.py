@@ -288,6 +288,8 @@ class CashRequestLines(models.Model):
     name = fields.Char('Serial No', required=True)
     cash_request_id = fields.Many2one('account.cash.request', string="Cash Request")
     description = fields.Text('Description', required=True)
+    attachment = fields.Binary(string="Attachment", attachment=True, store=True, )
+    attachment_name = fields.Char('Attachment Name')
     unit_cost = fields.Float(string='Unit Cost', digits=(16, 2), required=True, store=True)
     total_cost = fields.Float(string='Total Cost', digits=(16, 2), required=True, store=True)
     state = fields.Selection(STATE_SELECTION, index=True, track_visibility='onchange', related='cash_request_id.state',

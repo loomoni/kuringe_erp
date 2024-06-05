@@ -42,9 +42,11 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="button_send_request" states="draft" string="Send Request" type="object" class="btn-primary"/>
+                    <button name="button_send_request" states="draft" string="Send Request" type="object"
+                            class="btn-primary"/>
 
-                    <button name="button_check_ss" states="request" string="Check by SS" type="object" class="btn-primary"
+                    <button name="button_check_ss" states="request" string="Check by SS" type="object"
+                            class="btn-primary"
                             groups="cash_requests.cash_request_hod"/>
                     <button name="button_check_acc" states="checked_ss" string="Check by Accountant" type="object"
                             class="btn-primary"
@@ -139,6 +141,10 @@
                                         <group>
                                             <field name="description"
                                                    attrs="{'readonly': [('state','in',['approved','funds_received','closed'])]}"/>
+                                        </group>
+                                        <group>
+                                            <field name="attachment"/>
+                                            <field name="attachment_name" invisible="1"/>
                                         </group>
                                     </sheet>
                                 </form>
