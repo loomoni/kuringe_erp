@@ -139,6 +139,13 @@ class PropertyClientManagement(models.Model):
         self.write({'state': 'active'})
         return True
 
+    @api.model
+    def check_and_expire_contracts(self):
+        today = fields.Date.today()
+        expired_contracts = self.search([('contract_end_date', '<=', today), ('state', '!=', 'expired')])
+        for contract in expired_contracts:
+            contract.button_expire()
+
     @api.multi
     def button_expire(self):
         for unit in self.unit_ids:

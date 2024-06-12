@@ -28,6 +28,7 @@
         'views/views.xml',
         'views/templates.xml',
         'data/email_template.xml',
+        'data/ir_cron_data.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
