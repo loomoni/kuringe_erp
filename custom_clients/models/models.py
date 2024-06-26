@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pkg_resources import _
 
 from odoo import models, fields, api
 from datetime import datetime, timedelta
@@ -53,6 +54,13 @@ class PropertyClientManagement(models.Model):
                                   track_visibility='onchange')
     contract_file_name = fields.Char('Contract File Name')
     signed_contract = fields.Binary(string="Signed Contract")
+
+    @api.multi
+    def unlink(self):
+        for contract in self:
+            if contract.state in ['active', 'expired']:
+                raise ValidationError(_("You can not delete active or expired contract"))
+        return super(PropertyClientManagement, self).unlink()
 
     @api.model
     def send_contract_expiry_notification(self):

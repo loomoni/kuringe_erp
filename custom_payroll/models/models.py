@@ -10,6 +10,7 @@ from xlsxwriter.utility import xl_rowcol_to_cell
 from dateutil.relativedelta import relativedelta
 from odoo.addons import decimal_precision as dp
 
+
 class HrPayslipEmployeesInherited(models.TransientModel):
     _inherit = 'hr.payslip.employees'
 
@@ -41,10 +42,11 @@ class HrPayslipEmployeesInherited(models.TransientModel):
             }
             payslips += self.env['hr.payslip'].create(res)
         payslips.compute_sheet()
-        payslipRun = self.env['hr.payslip.run'].search([('id','=',active_id)], limit=1)
+        payslipRun = self.env['hr.payslip.run'].search([('id', '=', active_id)], limit=1)
         if payslipRun:
-            payslipRun.write({'state':'generated'})
+            payslipRun.write({'state': 'generated'})
         return {'type': 'ir.actions.act_window_close'}
+
 
 class HrPayslipRunCustomInherited(models.Model):
     _name = 'hr.payslip.run'
@@ -58,16 +60,19 @@ class HrPayslipRunCustomInherited(models.Model):
         ('bm_confirmed', 'Endorsed By BM'),
         ('confirmed', 'Approved by FM'),
         ('close', 'Closed'),
-    ], string='Status', index=True, readonly=True, copy=False, default='draft',track_visibility="onchange",)
-    slip_ids = fields.One2many('hr.payslip', 'payslip_run_id', string='Payslips',states={'draft': [('readonly', False)], 'generated': [('readonly', False)]})
-    journal_id = fields.Many2one('account.journal', 'Bank', states={'draft': [('readonly', False)]}, required=True, domain="[('type','in',['bank'])]", default=lambda self: self.env['account.journal'].search([('type', '=', 'bank')], limit=1))
+    ], string='Status', index=True, readonly=True, copy=False, default='draft', track_visibility="onchange", )
+    slip_ids = fields.One2many('hr.payslip', 'payslip_run_id', string='Payslips',
+                               states={'draft': [('readonly', False)], 'generated': [('readonly', False)]})
+    journal_id = fields.Many2one('account.journal', 'Bank', states={'draft': [('readonly', False)]}, required=True,
+                                 domain="[('type','in',['bank'])]",
+                                 default=lambda self: self.env['account.journal'].search([('type', '=', 'bank')],
+                                                                                         limit=1))
 
     @api.multi
     def hr_checked_payslip_run(self):
         if self.branch_id.hr_manager_id.user_id.id == self.env.uid:
             self.write({'state': 'hr_confirmed'})
         return True
-
 
     @api.multi
     def bm_checked_payslip_run(self):
@@ -80,7 +85,8 @@ class HrPayslipRunCustomInherited(models.Model):
         checkPayslip = False
         for payslip in self.slip_ids:
             if self.env['hr.payslip'].search(
-                    [('employee_id', '=', payslip.employee_id.id), ('state', '=', 'done'), ('date_to', '>', payslip.date_from)]):
+                    [('employee_id', '=', payslip.employee_id.id), ('state', '=', 'done'),
+                     ('date_to', '>', payslip.date_from)]):
                 checkPayslip = True
                 break
         if not checkPayslip:
@@ -114,7 +120,7 @@ class HrPayslipCustomInherited(models.Model):
                 \n* If the payslip is confirmed then status is set to \'Approved\'.
                 \n* When user cancel payslip the status is \'Rejected\'.""")
 
-    @api.onchange('line_ids','line_ids.amount')
+    @api.onchange('line_ids', 'line_ids.amount')
     def onchange_line_ids(self):
         total = 0
         for line in self.line_ids:
@@ -158,7 +164,6 @@ class HrPayslipCustomInherited(models.Model):
                 line.amount = total
         return True
 
-
     @api.multi
     def compute_sheet(self):
         for payslip in self:
@@ -169,7 +174,7 @@ class HrPayslipCustomInherited(models.Model):
                 # set the list of contract for which the rules have to be applied
                 # if we don't give the contract, then the rules to apply should be for all current contracts of the employee
                 contract_ids = payslip.contract_id.ids or \
-                    self.get_contract(payslip.employee_id, payslip.date_from, payslip.date_to)
+                               self.get_contract(payslip.employee_id, payslip.date_from, payslip.date_to)
                 lines = []
                 for line in self._get_payslip_lines(contract_ids, payslip.id):
                     if line['code'] == 'LO':
@@ -181,12 +186,13 @@ class HrPayslipCustomInherited(models.Model):
                         lines.append((0, 0, line))
                     else:
                         lines.append((0, 0, line))
-                payslip.write({'line_ids': lines, 'number': number, 'is_computed': True, 'journal_id': payslip.contract_id.journal_id.id})
+                payslip.write({'line_ids': lines, 'number': number, 'is_computed': True,
+                               'journal_id': payslip.contract_id.journal_id.id})
                 payslip.button_recompute_net()
             else:
-                raise ValidationError(_('Please Confirm Employee Contract Details For '+ str(payslip.employee_id.name)))
+                raise ValidationError(
+                    _('Please Confirm Employee Contract Details For ' + str(payslip.employee_id.name)))
         return True
-
 
     @api.multi
     def action_payslip_done(self):
@@ -196,7 +202,8 @@ class HrPayslipCustomInherited(models.Model):
                     raise ValidationError(
                         _('Please Confirm Employee Bank Details For ' + str(item.employee_id.name)))
         checkPayslip = False
-        if self.env['hr.payslip'].search([('employee_id', '=', self.employee_id.id),('state','=','done'), ('date_to', '>', self.date_from)]):
+        if self.env['hr.payslip'].search(
+                [('employee_id', '=', self.employee_id.id), ('state', '=', 'done'), ('date_to', '>', self.date_from)]):
             checkPayslip = True
         if not checkPayslip:
             for slip in self:
@@ -331,10 +338,10 @@ class HrPayslipCustomInherited(models.Model):
                             line.loan_line_id.amount = line.amount
                 move.post()
         else:
-            raise ValidationError(_('The already exists a payslip for the specified period for ' + str(self.employee_id.name)))
+            raise ValidationError(
+                _('The already exists a payslip for the specified period for ' + str(self.employee_id.name)))
 
         return True
-
 
 
 class PayrollSummary(models.Model):
@@ -368,7 +375,6 @@ class PayrollSummaryWizard(models.TransientModel):
     company = fields.Many2one('res.company', default=lambda self: self.env['res.company']._company_default_get(),
                               string="Company")
 
-
     # to get salary rules names
     @api.multi
     def get_rules(self):
@@ -384,7 +390,7 @@ class PayrollSummaryWizard(models.TransientModel):
 
     @api.multi
     def get_report(self):
-        file_name = _('payroll summary '+str(self.date_from)+ ' - '+str(self.date_to)+' report.xlsx')
+        file_name = _('payroll summary ' + str(self.date_from) + ' - ' + str(self.date_to) + ' report.xlsx')
         fp = BytesIO()
 
         workbook = xlsxwriter.Workbook(fp)
@@ -407,7 +413,8 @@ class PayrollSummaryWizard(models.TransientModel):
                                                   'bold': False, 'size': 9,
                                                   'num_format': '#,###0.00'})
         cell_number_format.set_border()
-        worksheet = workbook.add_worksheet('payroll summary '+str(self.date_from)+ ' - '+str(self.date_to)+' report.xlsx')
+        worksheet = workbook.add_worksheet(
+            'payroll summary ' + str(self.date_from) + ' - ' + str(self.date_to) + ' report.xlsx')
         normal_num_bold = workbook.add_format({'bold': True, 'num_format': '#,###0.00', 'size': 9, })
         normal_num_bold.set_border()
         worksheet.set_column('A:A', 20)
@@ -458,7 +465,7 @@ class PayrollSummaryWizard(models.TransientModel):
             col = 0
             ro = row
 
-           # payslipResult = self.sudo().compute_employee_payslips(self.date_from,self.date_to)
+            # payslipResult = self.sudo().compute_employee_payslips(self.date_from,self.date_to)
 
             payslip_ids = self.env['hr.payslip'].sudo().search(
                 [('date_from', '=', self.date_from), ('date_to', '=', self.date_to), ('state', '=', 'done')])
@@ -527,14 +534,16 @@ class PayrollSummaryWizard(models.TransientModel):
         }
 
     @api.multi
-    def compute_employee_payslips(self,date_from,date_to):
+    def compute_employee_payslips(self, date_from, date_to):
         employees = []
-        for employee in self.env['hr.employee'].search([('active','=',True)]):
-            if self.env['hr.contract'].search([('employee_id','=',employee.id),('state','=','open')]):
+        for employee in self.env['hr.employee'].search([('active', '=', True)]):
+            if self.env['hr.contract'].search([('employee_id', '=', employee.id), ('state', '=', 'open')]):
                 employees.append(employee)
 
         for emp in employees:
-            checkPayslip = self.env['hr.payslip'].search([('employee_id','=',emp.id),('date_from', '=',date_from), ('date_to', '=', date_to), ('state', '=', 'done')])
+            checkPayslip = self.env['hr.payslip'].search(
+                [('employee_id', '=', emp.id), ('date_from', '=', date_from), ('date_to', '=', date_to),
+                 ('state', '=', 'done')])
             if not checkPayslip:
                 slip_data = self.env['hr.payslip'].onchange_employee_id(date_from, date_to, emp.id,
                                                                         contract_id=False)
