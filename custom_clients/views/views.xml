@@ -1,28 +1,6 @@
 <odoo>
     <data>
-<!--        <record id="" model="ir.actions.act_window">-->
-<!--            <field name="name">Clients</field>-->
-<!--            <field name="res_model">property.client.management</field>-->
-<!--            <field name="view_type">form</field>-->
-<!--            <field name="view_mode">kanban,tree,form</field>-->
-<!--            <field name="help" type="html">-->
-<!--                <p class="o_view_nocontent_smiling_face">-->
-<!--                    No Client Created Yet?-->
-<!--                </p>-->
-<!--            </field>-->
-<!--        </record>-->
 
-        <record id="action_client_management" model="ir.actions.act_window">
-            <field name="name">Clients</field>
-            <field name="res_model">property.client.management</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">kanban,tree,form</field>
-            <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
-                    No Client Created Yet?
-                </p>
-            </field>
-        </record>
 
         <record id="client_list_tree_view" model="ir.ui.view">
             <field name="name">client.list.tree.view</field>
@@ -373,6 +351,18 @@
                 <p>
                     <!-- More details about what a user can do with this object will be OK -->
                     No Street created, Start create
+                </p>
+            </field>
+        </record>
+
+        <record id="action_client_management" model="ir.actions.act_window">
+            <field name="name">Clients</field>
+            <field name="res_model">property.client.management</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No Client Created Yet?
                 </p>
             </field>
         </record>
