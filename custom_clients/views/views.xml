@@ -1,6 +1,18 @@
 <odoo>
     <data>
-        <record id="action_client_management" model="ir.actions.act_window">
+<!--        <record id="" model="ir.actions.act_window">-->
+<!--            <field name="name">Clients</field>-->
+<!--            <field name="res_model">property.client.management</field>-->
+<!--            <field name="view_type">form</field>-->
+<!--            <field name="view_mode">kanban,tree,form</field>-->
+<!--            <field name="help" type="html">-->
+<!--                <p class="o_view_nocontent_smiling_face">-->
+<!--                    No Client Created Yet?-->
+<!--                </p>-->
+<!--            </field>-->
+<!--        </record>-->
+
+        <record id="action_client_management_id" model="ir.actions.act_window">
             <field name="name">Clients</field>
             <field name="res_model">property.client.management</field>
             <field name="view_type">form</field>
