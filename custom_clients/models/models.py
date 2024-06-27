@@ -25,27 +25,27 @@ class PropertyClientManagement(models.Model):
         if employee and employee.user_id:
             return employee.user_id.partner_id.id
 
-    name = fields.Many2one(comodel_name='res.partner', string='Full Name', required=True,
+    name = fields.Many2one(comodel_name='res.partner', string='Full Name', required=False,
                            domain="[('customer', '=', True)]")
     tin_no = fields.Char(related='name.vat', string='TIN No', required=False, store=True)
     image_small = fields.Binary(
         "Client Image", attachment=True)
     creator_id = fields.Many2one('res.partner', string="Creator", readonly=True, store=True, default=_default_creator)
-    property_id = fields.Many2one('property.management', required=True, domain=[('state', '=', 'active')])
-    contract_start_date = fields.Date('Contract Start Date', required=True, store=True, default=fields.date.today())
-    contract_end_date = fields.Date('Contract End Date', required=True, store=True, default=fields.date.today())
-    payment_date = fields.Date(string="Payment Start Date", required=True, default=fields.Date.today())
-    no_of_months = fields.Integer('No of Months', required=True, store=True)
-    payment_interval = fields.Integer('Payment Interval', required=True, )
-    currency_id = fields.Many2one('res.currency', required=True,
+    property_id = fields.Many2one('property.management', required=False, domain=[('state', '=', 'active')])
+    contract_start_date = fields.Date('Contract Start Date', required=False, store=True, default=fields.date.today())
+    contract_end_date = fields.Date('Contract End Date', required=False, store=True, default=fields.date.today())
+    payment_date = fields.Date(string="Payment Start Date", required=False, default=fields.Date.today())
+    no_of_months = fields.Integer('No of Months', required=False, store=True)
+    payment_interval = fields.Integer('Payment Interval', required=False, )
+    currency_id = fields.Many2one('res.currency', required=False,
                                   default=lambda self: self.env.user.company_id.currency_id)
-    total_tax = fields.Monetary(string='Total Taxes', required=True, store=True)
-    total_rent = fields.Monetary(string='Total Rent', required=True, store=True)
+    total_tax = fields.Monetary(string='Total Taxes', required=False, store=True)
+    total_rent = fields.Monetary(string='Total Rent', required=False, store=True)
     total_paid = fields.Monetary(string='Total Paid Amount', store=True, readonly=True, compute='_amount_totals')
     total_balance = fields.Monetary(string='Total Balance', store=True, readonly=True, compute='_amount_totals')
     partner_id = fields.Many2one('res.partner', string="Client")
     state = fields.Selection(STATE_SELECTION, index=True, track_visibility='onchange',
-                             readonly=True, required=True, copy=False, default='draft')
+                             readonly=True, required=False, copy=False, default='draft')
     payment_plan_ids = fields.One2many('property.client.payment.plan', 'client_id', string="Payment Plans", index=True,
                                        track_visibility='onchange')
     unit_ids = fields.Many2many('property.units', 'property_client_units_rel', 'client_id', 'unit_id', string='Units',
@@ -251,10 +251,10 @@ class PropertyClientPaymentPlan(models.Model):
         ("paid", "Paid")
     ]
 
-    date = fields.Date(string="Payment Date", required=True)
-    untaxed_amount = fields.Float(string="Untaxed Amount", required=True, default=0)
-    tax_amount = fields.Float(string="Taxes", required=True, default=0)
-    amount = fields.Float(string="Total Amount", required=True)
+    date = fields.Date(string="Payment Date", required=False)
+    untaxed_amount = fields.Float(string="Untaxed Amount", required=False, default=0)
+    tax_amount = fields.Float(string="Taxes", required=False, default=0)
+    amount = fields.Float(string="Total Amount", required=False)
     paid = fields.Boolean(string="Paid")
     client_id = fields.Many2one('property.client.management', string="Client Ref.")
     state = fields.Selection(STATE_SELECTION, index=True, track_visibility='onchange', default='pending')
