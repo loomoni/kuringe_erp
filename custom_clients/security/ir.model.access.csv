@@ -5,7 +5,7 @@ access_property_acc,Propery Management Accountant,custom_clients.model_property_
 access_property_units_cc,Propery Units Customer Care,model_property_units,client_cc,1,1,1,1
 access_property_units_acc,Propery Units Accountant,model_property_units,client_acc,1,1,1,1
 
-access_client_management_cc,Client Management Customer Care,custom_clientsmodel_property_client_management,client_cc,1,1,1,0
+access_client_management_cc,Client Management Customer Care,custom_clients.model_property_client_management,client_cc,1,1,1,0
 access_client_management_acc,Client Management Accountant,custom_clients.model_property_client_management,client_acc,1,1,1,1
 
 access_client_payment_plan_cc,Client Payment Plan Customer Care,model_property_client_payment_plan,client_cc,1,1,1,1
