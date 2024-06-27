@@ -12,7 +12,7 @@
 <!--            </field>-->
 <!--        </record>-->
 
-        <record id="action_client_management_id" model="ir.actions.act_window">
+        <record id="action_client_management" model="ir.actions.act_window">
             <field name="name">Clients</field>
             <field name="res_model">property.client.management</field>
             <field name="view_type">form</field>
