@@ -142,14 +142,14 @@ class HrPayslipCustomInherited(models.Model):
 
     @api.multi
     def button_hr_confirm(self):
-        if self.employee_id.department_id.branch_id.hr_manager_id.user_id.id == self.env.uid:
-            self.write({'state': 'hr_confirmed'})
+        # if self.employee_id.department_id.branch_id.hr_manager_id.user_id.id == self.env.uid:
+        self.write({'state': 'hr_confirmed'})
         return True
 
     @api.multi
     def button_bm_confirm(self):
-        if self.employee_id.department_id.branch_id.manager_id.user_id.id == self.env.uid:
-            self.write({'state': 'bm_confirmed'})
+        # if self.employee_id.department_id.branch_id.manager_id.user_id.id == self.env.uid:
+        self.write({'state': 'bm_confirmed'})
         return True
 
     @api.multi
