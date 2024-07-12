@@ -146,21 +146,21 @@ class CashRequest(models.Model):
     def button_check_acc(self):
         if self.is_hq_request:
             self.write({'state': 'endorsed'})
-            fm = self.env['hr.employee'].sudo().search([('is_fm', '=', True)], limit=1)
-            if fm:
-                base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
-                base_url += '/web#id=%d&view_type=form&model=%s' % (self.id, self._name)
-                mail_content = "Dear Finance Manager," + "<br>Cash request is waiting your response.Please click the link below<br/> " + str(
-                    base_url)
-                values = {'model': 'annual.budget',
-                          'res_id': self.id,
-                          'subject': "Annual Budget Notification",
-                          'body_html': mail_content,
-                          'parent_id': None,
-                          'email_from': fm.user_id.partner_id.company_id.email,
-                          'email_to': fm.user_id.partner_id.email
-                          }
-                self.env['mail.mail'].sudo().create(values)
+            # fm = self.env['hr.employee'].sudo().search([('is_fm', '=', True)], limit=1)
+            # if fm:
+            #     base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+            #     base_url += '/web#id=%d&view_type=form&model=%s' % (self.id, self._name)
+            #     mail_content = "Dear Finance Manager," + "<br>Cash request is waiting your response.Please click the link below<br/> " + str(
+            #         base_url)
+            #     values = {'model': 'annual.budget',
+            #               'res_id': self.id,
+            #               'subject': "Annual Budget Notification",
+            #               'body_html': mail_content,
+            #               'parent_id': None,
+            #               'email_from': fm.user_id.partner_id.company_id.email,
+            #               'email_to': fm.user_id.partner_id.email
+            #               }
+            #     self.env['mail.mail'].sudo().create(values)
         else:
             self.write({'state': 'checked_acc'})
         return True
