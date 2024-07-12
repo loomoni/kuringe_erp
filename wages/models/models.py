@@ -64,6 +64,9 @@ class WageRequest(models.Model):
     labourer_ids = fields.One2many('account.wage.request.labourers', 'wage_request_id', string="Wage Labourers",
                                    index=True,
                                    track_visibility='onchange')
+    supportive_document_line_ids = fields.One2many(comodel_name='wages.support.document.line',
+                                                   string="Supportive Document",
+                                                   inverse_name="document_ids")
     payment_sheet = fields.Binary("Labourers Payment Signed Sheet", attachment=True)
 
     _sql_constraints = [
@@ -272,7 +275,7 @@ class WageRequestLabourers(models.Model):
 
     name = fields.Char('Labourer Name', required=True)
     wage_request_id = fields.Many2one('account.wage.request', string="Wage Request")
-    contact = fields.Integer('Contact', required=False)
+    contact = fields.Char('Contact', required=False)
     site = fields.Char('Site', required=False)
     no_of_days = fields.Integer('No. of Days', required=False, default=1)
     currency_id = fields.Many2one('res.currency', required=False,
@@ -284,3 +287,12 @@ class WageRequestLabourers(models.Model):
     def _compute_pay_total(self):
         for rec in self:
             rec.total_cost = rec.no_of_days * rec.unit_cost
+
+
+class WagesSupportDocumentLines(models.Model):
+    _name = 'wages.support.document.line'
+
+    document_name = fields.Char(string="Document Name")
+    attachment = fields.Binary(string="Attachment", attachment=True, store=True, )
+    attachment_name = fields.Char('Attachment Name')
+    document_ids = fields.Many2one('account.wage.request', string="Document ID")
