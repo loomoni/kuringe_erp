@@ -34,7 +34,6 @@ class WageRequest(models.Model):
         if employee:
             return employee.id
 
-
     def _default_reference(self):
         itemList = self.env['account.wage.request'].sudo().search_count([])
         return 'WAGES/REQUEST/00' + str(itemList + 1)
@@ -43,24 +42,29 @@ class WageRequest(models.Model):
     date = fields.Date(string="Date", required=True, default=fields.Date.today())
     requester_id = fields.Many2one('hr.employee', string="Requested By", required=True, default=_default_requester,
                                    readonly=True, store=True, states={'draft': [('readonly', False)]})
-    department_id = fields.Many2one('hr.department', string='Department', required=True, default=_default_department, readonly=True, store=True, states={'draft': [('readonly', False)]})
+    department_id = fields.Many2one('hr.department', string='Department', required=True, default=_default_department,
+                                    readonly=True, store=True, states={'draft': [('readonly', False)]})
     no_of_labourers = fields.Integer('No. of Labourers', required=True)
     activity_desc = fields.Char('Activity Description', required=True)
-    currency_id = fields.Many2one('res.currency', required=True, default=lambda self: self.env.user.company_id.currency_id)
+    currency_id = fields.Many2one('res.currency', required=True,
+                                  default=lambda self: self.env.user.company_id.currency_id)
     total_amount = fields.Monetary(string='Total Amount', store=True, compute='_compute_labour_amounts')
-    from_journal_id = fields.Many2one('account.journal', string='Credit Journal', domain="[('type','in',['cash','bank'])]")
+    from_journal_id = fields.Many2one('account.journal', string='Credit Journal',
+                                      domain="[('type','in',['cash','bank'])]")
     to_journal_id = fields.Many2one('account.journal', string='Debit Journal')
-    from_credit_account_id = fields.Many2one('account.account', string='Credit Account', required=False, store=True, states={'payment_confirmed': [('required', True)]})
-    to_debit_account_id = fields.Many2one('account.account', string='Debit Account', required=False, store=True, states={'payment_confirmed': [('required', True)]})
+    from_credit_account_id = fields.Many2one('account.account', string='Credit Account', required=False, store=True,
+                                             states={'payment_confirmed': [('required', True)]})
+    to_debit_account_id = fields.Many2one('account.account', string='Debit Account', required=False, store=True,
+                                          states={'payment_confirmed': [('required', True)]})
     payment_line_id = fields.Many2one('account.payment', string='Disbursement Entry', readonly=True, store=True)
     state = fields.Selection(STATE_SELECTION, index=True, track_visibility='onchange',
                              readonly=True, required=True, copy=False, default='draft', store=True)
     line_ids = fields.One2many('account.wage.request.lines', 'wage_request_id', string="Wage Labour Lines", index=True,
                                track_visibility='onchange')
-    labourer_ids = fields.One2many('account.wage.request.labourers', 'wage_request_id', string="Wage Labourers", index=True,
-                               track_visibility='onchange')
+    labourer_ids = fields.One2many('account.wage.request.labourers', 'wage_request_id', string="Wage Labourers",
+                                   index=True,
+                                   track_visibility='onchange')
     payment_sheet = fields.Binary("Labourers Payment Signed Sheet", attachment=True)
-
 
     _sql_constraints = [
         ('name_unique',
@@ -233,7 +237,6 @@ class WageRequest(models.Model):
             raise ValidationError(_('Please Select The Credit and Debit Journal'))
         return True
 
-
     @api.depends('line_ids')
     def _compute_labour_amounts(self):
         for rec in self:
@@ -241,7 +244,6 @@ class WageRequest(models.Model):
             for line in rec.line_ids:
                 totalAmount += line.total_cost
             rec.total_amount = totalAmount
-
 
 
 class WageRequestLines(models.Model):
@@ -252,11 +254,12 @@ class WageRequestLines(models.Model):
     name = fields.Char('Labour Type', required=True)
     wage_request_id = fields.Many2one('account.wage.request', string="Wage Request")
     quantity = fields.Integer('Quantity', required=True, default=1)
-    currency_id = fields.Many2one('res.currency', required=True, default=lambda self: self.env.user.company_id.currency_id)
+    currency_id = fields.Many2one('res.currency', required=True,
+                                  default=lambda self: self.env.user.company_id.currency_id)
     unit_cost = fields.Monetary(string='Unit Cost', store=True, required=True)
-    total_cost = fields.Float(string='Total Cost', digits=(16,2), store=True, compute='_compute_item_total')
+    total_cost = fields.Float(string='Total Cost', digits=(16, 2), store=True, compute='_compute_item_total')
 
-    @api.depends('quantity','unit_cost')
+    @api.depends('quantity', 'unit_cost')
     def _compute_item_total(self):
         for rec in self:
             rec.total_cost = rec.quantity * rec.unit_cost
@@ -269,15 +272,15 @@ class WageRequestLabourers(models.Model):
 
     name = fields.Char('Labourer Name', required=True)
     wage_request_id = fields.Many2one('account.wage.request', string="Wage Request")
-    no_of_days = fields.Integer('No. of Days', required=True, default=1)
-    currency_id = fields.Many2one('res.currency', required=True,
+    contact = fields.Integer('Contact', required=False)
+    site = fields.Char('Site', required=False)
+    no_of_days = fields.Integer('No. of Days', required=False, default=1)
+    currency_id = fields.Many2one('res.currency', required=False,
                                   default=lambda self: self.env.user.company_id.currency_id)
-    unit_cost = fields.Monetary(string='Unit Cost', store=True, required=True)
-    total_cost = fields.Float(string='Total Cost', digits=(16,2), store=True, compute='_compute_pay_total')
+    unit_cost = fields.Monetary(string='Unit Cost', store=True, required=False)
+    total_cost = fields.Float(string='Total Cost', digits=(16, 2), store=False, compute='_compute_pay_total')
 
-    @api.depends('no_of_days','unit_cost')
+    @api.depends('no_of_days', 'unit_cost')
     def _compute_pay_total(self):
         for rec in self:
             rec.total_cost = rec.no_of_days * rec.unit_cost
-
-

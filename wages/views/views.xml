@@ -125,25 +125,24 @@
                             </group>
                         </page>
                         <page string="Labourers">
-                            <field name="labourer_ids"  attrs="{'readonly': [('state','in', ['payment_confirmed'])], 'invisible': [('state','not in', ['approved','payment_initiated','payment_confirmed'])]}">
+                            <field name="labourer_ids">
+<!--                            <field name="labourer_ids"  attrs="{'readonly': [('state','in', ['payment_confirmed'])], 'invisible': [('state','not in', ['approved','payment_initiated','payment_confirmed'])]}">-->
                                 <tree>
                                   <field name="name"/>
-                                  <field name="currency_id" invisible="1"/>
-                                  <field name="no_of_days"/>
-                                  <field name="unit_cost"/>
-                                  <field name="total_cost"/>
+<!--                                  <field name="currency_id" invisible="1"/>-->
+                                  <field name="contact"/>
+                                  <field name="site"/>
+<!--                                  <field name="total_cost"/>-->
                                 </tree>
                                 <form>
                                   <sheet>
                                     <group>
                                       <group>
                                         <field name="name"/>
-                                        <field name="currency_id" invisible="1"/>
-                                        <field name="unit_cost"/>
+                                        <field name="site"/>
                                       </group>
                                       <group>
-                                        <field name="no_of_days"/>
-                                        <field name="total_cost"/>
+                                        <field name="contact"/>
                                       </group>
                                     </group>
                                   </sheet>
