@@ -11,6 +11,7 @@ class CashRequest(models.Model):
     _name = "account.cash.request"
     _description = "Cash Requests"
     _inherit = ['mail.thread', 'mail.activity.mixin']
+    _order = 'id desc'
 
     STATE_SELECTION = [
         ("draft", "Draft"),
