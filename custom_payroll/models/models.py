@@ -120,15 +120,15 @@ class HrPayslipCustomInherited(models.Model):
                 \n* If the payslip is confirmed then status is set to \'Approved\'.
                 \n* When user cancel payslip the status is \'Rejected\'.""")
 
-    @api.onchange('line_ids', 'line_ids.amount')
-    def onchange_line_ids(self):
-        total = 0
-        for line in self.line_ids:
-            if line.code.lower() != 'net' and line.code.lower() != 'gross':
-                total += line.amount
-        for line in self.line_ids:
-            if line.code.lower() == 'net':
-                line.amount = total
+    # @api.onchange('line_ids','line_ids.amount')
+    # def onchange_line_ids(self):
+    #     total = 0
+    #     for line in self.line_ids:
+    #         if line.code.lower() != 'net' and line.code.lower() != 'gross':
+    #             total += line.amount
+    #     for line in self.line_ids:
+    #         if line.code.lower() == 'net':
+    #             line.amount = total
 
     @api.multi
     def button_reset_sheet(self):
