@@ -24,7 +24,7 @@
                                 groups="custom_purchase.group_purchase_accountant"/>
                         <button name="button_approve" type="object" states='fm_review' string="Approve Order"
                                 class="oe_highlight" groups="purchase.group_purchase_manager"/>
-                        <button name="cashier_handle" type="object" states="purchase" string="Handle Cash"
+                        <button name="cashier_handle" type="object" states="purchase" string="Payment"
                                 class="oe_highlight" id="cashier_handle"
                                 groups="custom_purchase.group_cashier_po"/>
                         <button name="action_view_invoice" string="Create Bill" type="object" class="oe_highlight"

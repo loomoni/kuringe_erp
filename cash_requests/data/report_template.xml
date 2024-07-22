@@ -120,6 +120,12 @@
                                     </td>
                                 </tr>
                             </t>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td style="border: 1px solid #000; text-align: left;  font-weight: bold;">TOTAL</td>
+                                <td style="border: 1px solid #000; text-align: right; background-color: #EAEAEA;"> <span t-field="o.total_balance"/></td>
+                            </tr>
                         </tbody>
                     </table>
 
