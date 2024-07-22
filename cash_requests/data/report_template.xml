@@ -17,7 +17,7 @@
                                 </div>
                             </td>
                             <td style="width: 60%;">
-                                <div style="font-size: 20px; font-family: 'Times New Roman', Times, serif; margin-top: 10px; text-align: left; font-weight: bold">
+                                <div style="font-size: 20px; font-family: 'Times New Roman', Times, serif; margin-top: 0px; text-align: left; font-weight: bold">
                                     <t t-esc="o.company_info().get('name')"/>
                                 </div>
                             </td>
@@ -123,8 +123,8 @@
                             <tr>
                                 <td></td>
                                 <td></td>
-                                <td style="border: 1px solid #000; text-align: left;  font-weight: bold;">TOTAL</td>
-                                <td style="border: 1px solid #000; text-align: right; background-color: #EAEAEA;"> <span t-field="o.total_balance"/></td>
+                                <td style="border: 1px solid #000; text-align: left;  font-weight: bold; background-color: #EAEAEA; height: 50px">TOTAL</td>
+                                <td style="border: 1px solid #000; text-align: right; background-color: #EAEAEA; height: 50px"> <span t-field="o.total_balance"/></td>
                             </tr>
                         </tbody>
                     </table>
