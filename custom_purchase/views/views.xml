@@ -19,8 +19,14 @@
                         <button name="button_recommend" type="object" states="confirmed" string="Recommend Order"
                                 class="oe_highlight" id="bid_recommend"
                                 groups="custom_purchase.group_purchase_accountant"/>
-                        <button name="button_approve" type="object" states='to approve' string="Approve Order"
+                        <button name="button_fm_review" type="object" states="to approve" string="Review order"
+                                class="oe_highlight" id="bid_recommend"
+                                groups="custom_purchase.group_purchase_accountant"/>
+                        <button name="button_approve" type="object" states='fm_review' string="Approve Order"
                                 class="oe_highlight" groups="purchase.group_purchase_manager"/>
+                        <button name="cashier_handle" type="object" states="purchase" string="Handle Cash"
+                                class="oe_highlight" id="bid_recommend"
+                                groups="custom_purchase.group_purchase_accountant"/>
                         <button name="action_view_invoice" string="Create Bill" type="object" class="oe_highlight"
                                 context="{'create_bill':True}"
                                 attrs="{'invisible': ['|', ('state', 'not in', ('purchase', 'done')), ('invoice_status', 'in', ('no', 'invoiced'))]}"
@@ -46,7 +52,7 @@
                                 groups="purchase.group_purchase_manager"/>
                         <button name="button_unlock" type="object" string="Unlock" states="done"
                                 groups="purchase.group_purchase_manager"/>
-                        <field name="state" widget="statusbar" statusbar_visible="sent,confirmed,to approve,purchase"
+                        <field name="state" widget="statusbar" statusbar_visible="sent,confirmed,to approve,fm_review,purchase,cashier_handle"
                                readonly="1"/>
                     </header>
                 </xpath>

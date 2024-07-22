@@ -24,7 +24,9 @@ class PurchaseOrderCustom(models.Model):
         ('sent', 'Draft'),
         ('confirmed', 'Confirmed by PO'),
         ('to approve', 'Recommended By Accountant'),
-        ('purchase', 'Approved by FM'),
+        ('fm_review', 'Reviewed by FM'),
+        ('purchase', 'Approved by MD'),
+        ('cashier_handle', 'Cashier'),
         ('done', 'Locked'),
         ('cancel', 'Cancelled')
     ], string='Status', readonly=True, index=True, copy=False, default='sent', track_visibility='onchange')
@@ -40,10 +42,20 @@ class PurchaseOrderCustom(models.Model):
         return {}
 
     @api.multi
+    def button_fm_review(self):
+        self.write({'state': 'fm_review'})
+        return {}
+
+    @api.multi
     def button_approve(self, force=False):
         self._add_supplier_to_product()
         self.write({'state': 'purchase', 'date_approve': fields.Date.context_today(self)})
         self.filtered(lambda p: p.company_id.po_lock == 'lock').write({'state': 'done'})
+        return {}
+
+    @api.multi
+    def button_cashier(self):
+        self.write({'state': 'cashier_handle'})
         return {}
 
 
