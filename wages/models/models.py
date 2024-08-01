@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import base64
+from io import BytesIO
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError, UserError
@@ -9,6 +11,7 @@ class WageRequest(models.Model):
     _name = "account.wage.request"
     _description = "Wage Requests"
     _inherit = ['mail.thread', 'mail.activity.mixin']
+    _order = 'id desc'
 
     STATE_SELECTION = [
         ("draft", "Draft"),
@@ -39,6 +42,8 @@ class WageRequest(models.Model):
         return 'WAGES/REQUEST/00' + str(itemList + 1)
 
     name = fields.Char('Serial No', required=True, default=_default_reference)
+    company_id = fields.Many2one('res.company', 'Company',
+                                 default=lambda self: self.env['res.company']._company_default_get('account.cash.request'))
     date = fields.Date(string="Date", required=True, default=fields.Date.today())
     requester_id = fields.Many2one('hr.employee', string="Requested By", required=True, default=_default_requester,
                                    readonly=True, store=True, states={'draft': [('readonly', False)]})
@@ -74,6 +79,22 @@ class WageRequest(models.Model):
          'UNIQUE(name)',
          'Serial No Must be Unique'),
     ]
+
+    @api.model
+    def company_info(self):
+        company = self.env.user.company_id
+        logo_data = base64.b64decode(company.logo)
+        return {
+            'name': company.name,
+            'vat': company.vat,
+            'vrn': company.company_registry,
+            'street': company.street,
+            'street2': company.street2,
+            'phone': company.phone,
+            'email': company.email,
+            'website': company.website,
+            'logo': BytesIO(logo_data)
+        }
 
     @api.multi
     @api.onchange('from_journal_id', 'to_journal_id')

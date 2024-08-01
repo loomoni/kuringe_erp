@@ -27,6 +27,8 @@
         'security/security.xml',
         'views/views.xml',
         'views/templates.xml',
+        'data/report.xml',
+        'data/report_template.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

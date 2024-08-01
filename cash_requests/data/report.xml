@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
+
     <report
             id="cash_request_id_pdf_print"
             model="account.cash.request"
@@ -9,4 +10,5 @@
             name="cash_requests.cash_request_template"
             file="cash_requests.cash_request_template"
     />
+
 </odoo>
