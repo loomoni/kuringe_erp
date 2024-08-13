@@ -26,8 +26,6 @@ class CashRequest(models.Model):
         ("rejected", "Rejected"),
     ]
 
-
-
     def _default_department(self):
         employee = self.env['hr.employee'].sudo().search(
             [('user_id', '=', self.env.uid)], limit=1)
@@ -40,13 +38,45 @@ class CashRequest(models.Model):
         if employee:
             return employee.id
 
+    # def _default_reference(self):
+    #     itemList = self.env['account.cash.request'].sudo().search_count([])
+    #     return 'CASH/REQUEST/00' + str(itemList + 1)
+
+    # @api.depends('department_id')
+    # @api.onchange('department_id')
+    # def _default_reference(self):
+    #     itemList = self.env['account.cash.request'].sudo().search_count([])
+    #     department_id = self.env['account.cash.request'].sudo().search([])
+    #     return 'CASH/REQUEST/{}/00{}'.format(department_id.code, itemList + 1)
+
+    # def _default_reference(self):
+    #     itemList = self.env['account.cash.request'].sudo().search_count([])
+    #
+    #     # Ensure department_id is available and related to the correct model
+    #     department_code = self.department_id.code if self.department_id else 'UNKNOWN'
+
+        # Format the reference string
+        # return 'CASH/REQUEST/{}/{}'.format(department_code, str(itemList + 1).zfill(3))
+
+    # @api.onchange('department_id')
     def _default_reference(self):
+        # Get the count of records to determine the next sequence number
         itemList = self.env['account.cash.request'].sudo().search_count([])
-        return 'CASH/REQUEST/00' + str(itemList + 1)
+
+        # Get the department code of the current user
+        department = self.env['hr.employee'].sudo().search(
+            [('user_id', '=', self.env.uid)], limit=1).department_id
+
+        # Ensure department_id is available and related to the correct model
+        department_code = department.code if department else 'UNDEFINED'
+
+        # Format the reference string
+        return 'CASH/REQUEST/{}/{}'.format(department_code, str(itemList + 1).zfill(3))
 
     name = fields.Char('Serial No', required=True, default=_default_reference)
     company_id = fields.Many2one('res.company', 'Company',
-                                 default=lambda self: self.env['res.company']._company_default_get('account.cash.request'))
+                                 default=lambda self: self.env['res.company']._company_default_get(
+                                     'account.cash.request'))
     date = fields.Date(string="Date", required=True, default=fields.Date.today())
     requester_id = fields.Many2one('hr.employee', string="Requested By", required=True, default=_default_requester,
                                    readonly=True, store=True, states={'draft': [('readonly', False)]})
