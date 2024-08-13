@@ -156,7 +156,7 @@
                             </td>
 
                             <t t-if="o.state in ['checked_ss', 'checked_hr', 'recommended','endorsed','payment_initiated','payment_confirmed', 'approve']">
-                                <td style="font-weight: bold; height: 30px;">Submitted by:
+                                <td style="font-weight: bold; height: 30px;">Checked by:
                                     <span t-field="o.requester_id.parent_id.name"/>
                                 </td>
                             </t>
