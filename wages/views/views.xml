@@ -198,6 +198,55 @@
         </field>
     </record>
 
+    <!--    Site configuration starts -->
+
+    <record id="sites_tree_view" model="ir.ui.view">
+        <field name="name">sites.configuration.tree.view</field>
+        <field name="model">sites.configuration</field>
+        <field name="arch" type="xml">
+            <tree string="Site">
+                <field name="name"/>
+                <field name="location"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="sites_configuration_form_view" model="ir.ui.view">
+        <field name="name">sites.configuration.form.view</field>
+        <field name="model">sites.configuration</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                        <group>
+                             <field name="location"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="action_site_configuration" model="ir.actions.act_window">
+        <field name="name">Site</field>
+        <field name="res_model">sites.configuration</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Ready to create a site?
+            </p>
+            <p>
+                Let's create a site.
+            </p>
+        </field>
+    </record>
+
+
     <menuitem name="Wage Requests" id="wages.menu_root"
               groups="wages.wage_request_staff,wages.wage_request_hod,wages.wage_request_cashier,wages.wage_request_hr,wages.wage_request_accountant,wages.wage_request_bm,wages.wage_request_fm"/>
 
@@ -208,4 +257,19 @@
             action="action_wage_requests"
             sequence="2"
             groups="wages.wage_request_staff,wages.wage_request_hod,wages.wage_request_cashier,wages.wage_request_hr,wages.wage_request_accountant,wages.wage_request_bm,wages.wage_request_fm"/>
+
+    <menuitem
+            parent="wages.menu_root"
+            name="Configuration"
+            id="menu_configuration_requests"
+            sequence="3"
+    />
+
+    <menuitem
+            parent="wages.menu_configuration_requests"
+            name="Site"
+            id="site_menu_id"
+            action="action_site_configuration"
+            sequence="4"
+    />
 </odoo>

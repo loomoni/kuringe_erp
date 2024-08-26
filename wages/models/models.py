@@ -297,7 +297,7 @@ class WageRequestLabourers(models.Model):
     name = fields.Char('Labourer Name', required=True)
     wage_request_id = fields.Many2one('account.wage.request', string="Wage Request")
     contact = fields.Char('Contact', required=False)
-    site = fields.Char('Site', required=False)
+    site = fields.Many2one(comodel_name='sites.configuration', string='Site', required=False)
     no_of_days = fields.Integer('No. of Days', required=False, default=1)
     currency_id = fields.Many2one('res.currency', required=False,
                                   default=lambda self: self.env.user.company_id.currency_id)
@@ -317,3 +317,10 @@ class WagesSupportDocumentLines(models.Model):
     attachment = fields.Binary(string="Attachment", attachment=True, store=True, )
     attachment_name = fields.Char('Attachment Name')
     document_ids = fields.Many2one('account.wage.request', string="Document ID")
+
+
+class SiteConfi(models.Model):
+    _name = 'sites.configuration'
+
+    name = fields.Char(string="Name")
+    location = fields.Char(string="Location")

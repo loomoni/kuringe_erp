@@ -32,3 +32,5 @@ access_wage_employees_bm,Wage Employees BM Group,hr.model_hr_employee,wage_reque
 access_wage_employees_fm,Wage Employees FM Group,hr.model_hr_employee,wage_request_fm,1,1,1,1
 
 access_wage_supportive_doc,Wages Supportive Document,wages.model_wages_support_document_line,,1,1,1,1
+
+access_wage_sites_configuration,Wages sites configuration,wages.model_sites_configuration,,1,1,1,1
