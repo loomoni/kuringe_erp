@@ -52,11 +52,11 @@
         </field>
     </record>
 
-    <record id="om_account_asset_view_form_inherited" model="ir.ui.view">
-        <field name="name">om.account.asset.view.form.inherited</field>
-        <field name="model">account.asset.asset</field>
-        <field name="inherit_id" ref="om_account_asset.view_account_asset_asset_form"/>
-        <field name="arch" type="xml">
+<!--    <record id="om_account_asset_view_form_inherited" model="ir.ui.view">-->
+<!--        <field name="name">om.account.asset.view.form.inherited</field>-->
+<!--        <field name="model">account.asset.asset</field>-->
+<!--        <field name="inherit_id" ref="om_account_asset.view_account_asset_asset_form"/>-->
+<!--        <field name="arch" type="xml">-->
 <!--            <xpath expr="//notebook/page[@name='depreciation']" position="after">-->
 <!--                <page string="Supportive Document">-->
 <!--                    <field name="supportive_document_line_ids">-->
@@ -68,8 +68,8 @@
 <!--                    </field>-->
 <!--                </page>-->
 <!--            </xpath>-->
-        </field>
-    </record>
+<!--        </field>-->
+<!--    </record>-->
 
     <record id="om_account_asset_view_account_asset_search_inherited" model="ir.ui.view">
         <field name="name">om.account.asset.view.account.asset.search.inherited</field>
