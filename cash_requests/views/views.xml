@@ -139,6 +139,10 @@
                                             </group>
                                         </group>
                                         <group>
+                                            <field name="site_id"
+                                                   attrs="{'readonly': [('state','in',['approved','funds_received','closed'])]}"/>
+                                        </group>
+                                        <group>
                                             <field name="description"
                                                    attrs="{'readonly': [('state','in',['approved','funds_received','closed'])]}"/>
                                         </group>
