@@ -117,6 +117,7 @@
                                 <tree>
                                     <field name="name"/>
                                     <field name="description"/>
+                                    <field name="site_id"/>
                                     <field name="unit_cost"/>
                                     <field name="total_cost"/>
                                     <field name="state"/>
